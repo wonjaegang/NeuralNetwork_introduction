@@ -1,11 +1,6 @@
 import random
 
 
-def activationFunc(x):
-    y = x
-    return y
-
-
 class Layer:
     def __init__(self, layerIndex, size, lastLayer):
         self.layerIndex = layerIndex
@@ -31,24 +26,33 @@ class Layer:
             valueList.append(value)
         return valueList
 
+    def backPropagation(self):
+        pass
+
 
 def randomList(size):
     return [random.random() for _ in range(size)]
 
 
+def activationFunc(x):
+    y = x
+    return y
+
+
+# 입력값의 평균값이 0.5 미만이면 0을, 이상이면 1을 반환한다.
 def expectedOutput():
-    if sum(inputLayer.nodeValue) > inputLayer.size / 2:
-        return 1
-    else:
+    if sum(inputLayer.nodeValue) < inputLayer.size / 2:
         return 0
+    else:
+        return 1
 
 
-if __name__ == "__main__":
-    inputLayer = Layer(0, 10, False)
-    layer1 = Layer(1, 8, inputLayer)
-    layer2 = Layer(2, 8, layer1)
-    outputLayer = Layer(3, 1, layer2)
+def costFunc():
+    y = pow((expectedOutput() - outputLayer.nodeValue[0]), 2)
+    return y
 
+
+def terminalDisplay():
     print("Input layer node value:", inputLayer.nodeValue)
 
     print("\nlayer1 node bias:", layer1.nodeBias)
@@ -62,3 +66,19 @@ if __name__ == "__main__":
     print("\nOutput layer node bias:", outputLayer.nodeBias)
     print("Output layer neuron weight:", outputLayer.neuronWeight)
     print("Output layer node value:", outputLayer.nodeValue)
+
+    print(expectedOutput())
+    print(costFunc())
+
+
+if __name__ == "__main__":
+    inputLayer = Layer(0, 10, False)
+    layer1 = Layer(1, 8, inputLayer)
+    layer2 = Layer(2, 8, layer1)
+    outputLayer = Layer(3, 1, layer2)
+
+    epoch = 10000
+    for _ in range(epoch):
+        pass
+
+    terminalDisplay()
