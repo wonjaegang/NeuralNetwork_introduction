@@ -8,14 +8,14 @@ class Layer:
         self.size = size
         # If it is an input layer
         if not lastLayer:
-            self.nodeValue = randomList(size)
+            self.nodeValue = randomList(size, 0, 1)
         # If it not
         else:
             self.lastLayer = lastLayer
-            self.nodeBias = randomList(size)
+            self.nodeBias = randomList(size, -2, 2)
 
             # 이전 레이어와 연결되는 신경망들의 가중치
-            self.neuronWeight = [randomList(lastLayer.size) for _ in range(size)]
+            self.neuronWeight = [randomList(lastLayer.size, -2, 2) for _ in range(size)]
 
             # 레이어의 각 노드들의 z(활성화함수 입력값)와 실제 노드의 값(활성화함수 출력값)을 구한다
             self.Z = self.feedForward()
@@ -41,12 +41,12 @@ def backPropagation(L1, L2):
 
 
 # 기타 함수들
-def randomList(size):
-    return [random.random() for _ in range(size)]
+def randomList(size, minimum, maximum):
+    return [random.uniform(minimum, maximum) for _ in range(size)]
 
 
 def sigmoid(x):
-    return 1 / (1 + math.e ** x)
+    return 1 / (1 + math.e ** (-1 * x))
 
 
 def derivativeSigmoid(x):
