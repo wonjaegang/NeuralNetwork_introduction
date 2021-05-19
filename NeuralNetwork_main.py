@@ -1,4 +1,5 @@
 import random
+import math
 
 
 class Layer:
@@ -27,6 +28,7 @@ class Layer:
         return valueList
 
     def backPropagation(self):
+        learningRate = 0.5
         pass
 
 
@@ -34,8 +36,16 @@ def randomList(size):
     return [random.random() for _ in range(size)]
 
 
+def sigmoid(x):
+    return 1 / (1 + math.e ** x)
+
+
+def derivativeSigmoid(x):
+    return sigmoid(x) * (1 - sigmoid(x))
+
+
 def activationFunc(x):
-    y = x
+    y = sigmoid(x)
     return y
 
 
@@ -48,7 +58,7 @@ def expectedOutput():
 
 
 def costFunc():
-    y = pow((expectedOutput() - outputLayer.nodeValue[0]), 2)
+    y = (expectedOutput() - outputLayer.nodeValue[0]) ** 2
     return y
 
 
@@ -73,11 +83,11 @@ def terminalDisplay():
 
 if __name__ == "__main__":
     inputLayer = Layer(0, 10, False)
-    layer1 = Layer(1, 8, inputLayer)
-    layer2 = Layer(2, 8, layer1)
+    layer1 = Layer(1, 4, inputLayer)
+    layer2 = Layer(2, 4, layer1)
     outputLayer = Layer(3, 1, layer2)
 
-    epoch = 10000
+    epoch = 1000
     for _ in range(epoch):
         pass
 
