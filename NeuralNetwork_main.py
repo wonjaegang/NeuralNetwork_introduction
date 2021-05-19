@@ -13,25 +13,34 @@ class Layer:
         else:
             self.lastLayer = lastLayer
             self.nodeBias = randomList(size)
+
             # 이전 레이어와 연결되는 신경망들의 가중치
             self.neuronWeight = [randomList(lastLayer.size) for _ in range(size)]
-            self.nodeValue = self.calculateNodeValue()
 
-    def calculateNodeValue(self):
-        valueList = []
+            # 레이어의 각 노드들의 z(활성화함수 입력값)와 실제 노드의 값(활성화함수 출력값)을 구한다
+            self.Z = self.feedForward()
+            self.nodeValue = self.activateNode()
+
+    def feedForward(self):
+        Z = []
         for nodeIndex in range(self.size):
-            value = 0
+            a = 0
             for lastNodeIndex in range(self.lastLayer.size):
-                value = value + self.lastLayer.nodeValue[lastNodeIndex] * self.neuronWeight[nodeIndex][lastNodeIndex]
-            value = activationFunc(value + self.nodeBias[nodeIndex])
-            valueList.append(value)
-        return valueList
+                a += self.lastLayer.nodeValue[lastNodeIndex] * self.neuronWeight[nodeIndex][lastNodeIndex]
+            z = a + self.nodeBias[nodeIndex]
+            Z.append(z)
+        return Z
 
-    def backPropagation(self):
-        learningRate = 0.5
-        pass
+    def activateNode(self):
+        return list(map(lambda x: activationFunc(x), self.Z))
 
 
+def backPropagation(L1, L2):
+    learningRate = 0.5
+    pass
+
+
+# 기타 함수들
 def randomList(size):
     return [random.random() for _ in range(size)]
 
@@ -67,14 +76,17 @@ def terminalDisplay():
 
     print("\nlayer1 node bias:", layer1.nodeBias)
     print("layer1 neuron weight:", layer1.neuronWeight)
+    print("layer1 Z:", layer1.Z)
     print("layer1 node value:", layer1.nodeValue)
 
     print("\nlayer2 node bias:", layer2.nodeBias)
     print("layer2 neuron weight:", layer2.neuronWeight)
+    print("layer2 Z:", layer2.Z)
     print("layer2 node value:", layer2.nodeValue)
 
     print("\nOutput layer node bias:", outputLayer.nodeBias)
     print("Output layer neuron weight:", outputLayer.neuronWeight)
+    print("Output layer Z:", outputLayer.Z)
     print("Output layer node value:", outputLayer.nodeValue)
 
     print(expectedOutput())
