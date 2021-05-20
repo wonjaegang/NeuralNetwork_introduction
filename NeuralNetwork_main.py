@@ -29,7 +29,7 @@ class Layer:
             # 비용함수의 노드값들에 대한 편미분값으로 이루어진 열벡터 dC_dA
             self.dC_dA = []
 
-    # Z(n) =  W * A(n-1) + B(n)
+    # Z(n) =  W(n, n-1) * A(n-1) + B(n)
     def feedForward(self):
         Z = []
         for nodeIndex in range(self.size):
@@ -40,52 +40,59 @@ class Layer:
             Z.append(z)
         return Z
 
-    # A(n) = k(Z(n))
-    # k(x)는 활성화 함수
+    # A(n) = k(Z(n)), k(x)는 활성화 함수
     def activateNode(self):
-        return list(map(lambda x: activationFunc(x), self.Z))
+        return list(map(lambda x: k(x), self.Z))
 
-    def backPropagation(self, L1, L2):
+    # dC/dB = dC/dA * dA/dB = dC/dA * k'(Z)
+    # dC/dW(i) = dC/dA * dA/dW = dC/dA * k'(Z) * lastLayer.A(i)
+    # dC/d(lastLayer.A) = dC/dA * dA/d(lastLayer.A) = dC/dA * k'(Z) * W
+    def feedBackward(self):
         learningRate = 0.5
         pass
 
 
-# 기타 함수들
-def randomList(size, minimum, maximum):
-    return [random.uniform(minimum, maximum) for _ in range(size)]
+# 입력 데이터 파일을 생성
+def createInputDataFile():
+    dataSize = 10000
+    with open("InputData", 'w') as f:
+        for _ in range(dataSize):
+            inputList = randomList(inputLayer.size, 0, 1)
+            for inputNum in inputList:
+                f.write("%f " % inputNum)
+            f.write(", ")
+            outputList = expectedOutput(inputList)
+            for outputNum in outputList:
+                f.write("%f " % outputNum)
+            f.write("\n")
 
 
-def sigmoid(x):
-    return 1 / (1 + math.e ** (-1 * x))
-
-
-def derivativeSigmoid(x):
-    return sigmoid(x) * (1 - sigmoid(x))
-
-
-def activationFunc(x):
+# 활성화 함수(Activation function)
+def k(x):
     y = sigmoid(x)
     return y
 
 
+# 활성화 함수의 도함수
+def dk(x):
+    y = derivativeSigmoid(x)
+    return y
+
+
 # 입력값의 평균값이 0.5 미만이면 [0]을, 이상이면 [1]을 반환한다.
-def expectedOutput():
-    if sum(inputLayer.A) < inputLayer.size / 2:
+def expectedOutput(inputList):
+    if sum(inputList) < inputLayer.size / 2:
         return [0]
     else:
         return [1]
 
 
-def calculateAverage(lastAverage, n, an):
-    return lastAverage * (n - 1) / n + an / n
-
-
-# C(y) = 1 / n * sum( (Ys - Y)^2 )
+# C(y) = 1 / n * sum( (setPoint - Y)^2 )
 # 비용함수는 오차의 제곱들의 평균값
 def costFunc():
     errorAverage = 0
     for index in range(outputLayer.size):
-        error = (expectedOutput()[index] - outputLayer.A[index]) ** 2
+        error = (expectedOutput(inputLayer.A)[index] - outputLayer.A[index]) ** 2
         errorAverage = calculateAverage(errorAverage, index + 1, error)
     return errorAverage
 
@@ -108,8 +115,25 @@ def terminalDisplay():
     print("Output layer Z:", outputLayer.Z)
     print("Output layer node value:", outputLayer.A)
 
-    print(expectedOutput())
+    print(expectedOutput(inputLayer.A))
     print(costFunc())
+
+
+# 기타 함수 모음
+def randomList(size, minimum, maximum):
+    return [random.uniform(minimum, maximum) for _ in range(size)]
+
+
+def calculateAverage(lastAverage, n, an):
+    return lastAverage * (n - 1) / n + an / n
+
+
+def sigmoid(x):
+    return 1 / (1 + math.e ** (-1 * x))
+
+
+def derivativeSigmoid(x):
+    return sigmoid(x) * (1 - sigmoid(x))
 
 
 if __name__ == "__main__":
@@ -123,3 +147,4 @@ if __name__ == "__main__":
         pass
 
     terminalDisplay()
+    createInputDataFile()
