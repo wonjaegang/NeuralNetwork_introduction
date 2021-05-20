@@ -60,11 +60,21 @@ def createInputDataFile():
             inputList = randomList(inputLayer.size, 0, 1)
             for inputNum in inputList:
                 f.write("%f " % inputNum)
-            f.write(", ")
+            f.write(",")
             outputList = expectedOutput(inputList)
             for outputNum in outputList:
                 f.write("%f " % outputNum)
             f.write("\n")
+
+
+def readData(index):
+    with open("InputData", 'r') as f:
+        for i, line in enumerate(f):
+            if i == index:
+                split = line.split(',')
+                inputData = list(map(lambda x: float(x), split[0].split(' ')[:-1]))
+                outputData = list(map(lambda x: float(x), split[1].split(' ')[:-1]))
+                return inputData, outputData
 
 
 # 활성화 함수(Activation function)
@@ -148,3 +158,4 @@ if __name__ == "__main__":
 
     terminalDisplay()
     createInputDataFile()
+    print(readData(0))
