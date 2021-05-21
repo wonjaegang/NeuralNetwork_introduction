@@ -30,6 +30,7 @@ class Layer:
             self.dC_dA = []
 
     # Z(n) =  W(n, n-1) * A(n-1) + B(n)
+    # A(n) = k(Z(n)), k(x)는 활성화 함수
     def feedForward(self):
         Z = []
         for nodeIndex in range(self.size):
@@ -38,11 +39,8 @@ class Layer:
                 temp += self.W[nodeIndex][lastNodeIndex] * self.lastLayer.A[lastNodeIndex]
             z = temp + self.B[nodeIndex]
             Z.append(z)
+        A = list(map(lambda x: k(x), Z))
         self.Z = Z
-
-    # A(n) = k(Z(n)), k(x)는 활성화 함수
-    def activateNode(self):
-        A = list(map(lambda x: k(x), self.Z))
         self.A = A
 
     # dC/dB = dC/dA * dA/dB = dC/dA * k'(Z)
@@ -185,11 +183,8 @@ if __name__ == "__main__":
         for dataIndex in range(setting.inputDataSize):
             inputLayer.A = readData(dataIndex)[0]
             layer1.feedForward()
-            layer1.activateNode()
             layer2.feedForward()
-            layer2.activateNode()
             outputLayer.feedForward()
-            outputLayer.activateNode()
             terminalDisplay()
 
             outputLayer.feedBackward()
