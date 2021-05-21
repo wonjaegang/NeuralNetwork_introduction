@@ -52,11 +52,18 @@ class Layer:
         pass
 
 
+class Setting:
+    def __init__(self):
+        self.epoch = 10000
+        self.inputDataSize = 10000
+        self.evaluateDataSize = 1000
+        self.learningRate = 0.5
+
+
 # 입력 데이터 파일을 생성
 def createInputDataFile():
-    dataSize = 10000
     with open("InputData", 'w') as f:
-        for _ in range(dataSize):
+        for _ in range(setting.inputDataSize):
             inputList = randomList(inputLayer.size, 0, 1)
             for inputNum in inputList:
                 f.write("%f " % inputNum)
@@ -67,6 +74,7 @@ def createInputDataFile():
             f.write("\n")
 
 
+# 입력 데이터셋 파일로부터 입력/출력 리스트 추출
 def readData(index):
     with open("InputData", 'r') as f:
         for i, line in enumerate(f):
@@ -147,13 +155,13 @@ def derivativeSigmoid(x):
 
 
 if __name__ == "__main__":
+    setting = Setting()
     inputLayer = Layer(0, 10, False)
     layer1 = Layer(1, 4, inputLayer)
     layer2 = Layer(2, 4, layer1)
     outputLayer = Layer(3, 1, layer2)
 
-    epoch = 1000
-    for _ in range(epoch):
+    for _ in range(setting.epoch):
         pass
 
     terminalDisplay()
