@@ -9,8 +9,8 @@ class Layer:
         # If it is an input layer
         if not lastLayer:
             # 입력값들로 이루어진 열벡터 A
-            self.A = randomList(size, 0, 1)
-        # If it not
+            self.A = []
+        # If it is not
         else:
             self.lastLayer = lastLayer
 
@@ -21,10 +21,10 @@ class Layer:
             self.W = [randomList(lastLayer.size, -1, 1) for _ in range(size)]
 
             # 레이어 노드들의 활성화함수 입력값들로 이루어진 열벡터 Z
-            self.Z = self.feedForward()
+            self.Z = []
 
             # 레이어 노드들의 활성화함수 출력값들로 이루어진 열벡터 A
-            self.A = self.activateNode()
+            self.A = []
 
             # 비용함수의 노드값들에 대한 편미분값으로 이루어진 열벡터 dC_dA
             self.dC_dA = []
@@ -38,11 +38,12 @@ class Layer:
                 temp += self.W[nodeIndex][lastNodeIndex] * self.lastLayer.A[lastNodeIndex]
             z = temp + self.B[nodeIndex]
             Z.append(z)
-        return Z
+        self.Z = Z
 
     # A(n) = k(Z(n)), k(x)는 활성화 함수
     def activateNode(self):
-        return list(map(lambda x: k(x), self.Z))
+        A = list(map(lambda x: k(x), self.Z))
+        self.A = A
 
     # dC/dB = dC/dA * dA/dB = dC/dA * k'(Z)
     # dC/dW(i) = dC/dA * dA/dW = dC/dA * k'(Z) * lastLayer.A(i)
@@ -51,30 +52,45 @@ class Layer:
         learningRate = 0.5
         pass
 
+    def updateNeurons(self):
+        pass
+
 
 class Setting:
     def __init__(self):
-        self.epoch = 10000
-        self.inputDataSize = 10000
-        self.evaluateDataSize = 1000
+        self.epoch = 1
+        self.inputDataSize = 1
+        self.evaluationDataSize = 1
         self.learningRate = 0.5
+
+
+# 하나의 입력-출력 데이터 셋을 파일에 입력
+def createDataSet(file):
+    inputList = randomList(inputLayer.size, 0, 1)
+    for inputNum in inputList:
+        file.write("%f " % inputNum)
+    file.write(",")
+    outputList = expectedOutput(inputList)
+    for outputNum in outputList:
+        file.write("%f " % outputNum)
+    file.write("\n")
 
 
 # 입력 데이터 파일을 생성
 def createInputDataFile():
     with open("InputData", 'w') as f:
         for _ in range(setting.inputDataSize):
-            inputList = randomList(inputLayer.size, 0, 1)
-            for inputNum in inputList:
-                f.write("%f " % inputNum)
-            f.write(",")
-            outputList = expectedOutput(inputList)
-            for outputNum in outputList:
-                f.write("%f " % outputNum)
-            f.write("\n")
+            createDataSet(f)
 
 
-# 입력 데이터셋 파일로부터 입력/출력 리스트 추출
+# 평가용 데이터 파일을 생성
+def createEvaluationDataFile():
+    with open("EvaluationData", 'w') as f:
+        for _ in range(setting.evaluationDataSize):
+            createDataSet(f)
+
+
+# 데이터셋 파일로부터 입력/출력 리스트 추출
 def readData(index):
     with open("InputData", 'r') as f:
         for i, line in enumerate(f):
@@ -156,14 +172,30 @@ def derivativeSigmoid(x):
 
 if __name__ == "__main__":
     setting = Setting()
+
     inputLayer = Layer(0, 10, False)
     layer1 = Layer(1, 4, inputLayer)
     layer2 = Layer(2, 4, layer1)
     outputLayer = Layer(3, 1, layer2)
 
-    for _ in range(setting.epoch):
-        pass
+    # createInputDataFile()
+    # createEvaluationDataFile()
 
-    terminalDisplay()
-    createInputDataFile()
-    print(readData(0))
+    for _ in range(setting.epoch):
+        for dataIndex in range(setting.inputDataSize):
+            inputLayer.A = readData(dataIndex)[0]
+            layer1.feedForward()
+            layer1.activateNode()
+            layer2.feedForward()
+            layer2.activateNode()
+            outputLayer.feedForward()
+            outputLayer.activateNode()
+            terminalDisplay()
+
+            outputLayer.feedBackward()
+            layer2.feedBackward()
+            layer1.feedBackward()
+
+            layer1.updateNeurons()
+            layer2.updateNeurons()
+            outputLayer.updateNeurons()
