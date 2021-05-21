@@ -29,6 +29,12 @@ class Layer:
             # 비용함수의 노드값들에 대한 편미분값으로 이루어진 열벡터 dC_dA
             self.dC_dA = []
 
+            # 비용함수의 가중치값들에 대한 편미분값으로 이루어진 (thisLayer size) * (lastLayer size) 크기의 행렬 dC_dA
+            self.dC_dW = []
+
+            # 비용함수의 편향값들에 대한 편미분값으로 이루어진 열벡터 dC_dA
+            self.dC_dB = []
+
     # Z(n) =  W(n, n-1) * A(n-1) + B(n)
     # A(n) = k(Z(n)), k(x)는 활성화 함수
     def feedForward(self):
@@ -43,13 +49,34 @@ class Layer:
         self.Z = Z
         self.A = A
 
-    # dC/dB = dC/dA * dA/dB = dC/dA * k'(Z)
-    # dC/dW(i) = dC/dA * dA/dW = dC/dA * k'(Z) * lastLayer.A(i)
-    # dC/d(lastLayer.A) = dC/dA * dA/d(lastLayer.A) = dC/dA * k'(Z) * W
     def feedBackward(self):
-        learningRate = 0.5
-        pass
+        # dC/dW(k) = dC/dA * dA/dW(k) = dC/dA * k'(Z) * lastLayer.A[k]
+        dC_dW = []
+        for nodeIndex in range(self.size):
+            dC_dW_k = []
+            for lastNodeIndex in range(self.lastLayer.size):
+                temp = self.dC_dA[nodeIndex] * dk(self.Z[nodeIndex]) * self.lastLayer.A[lastNodeIndex]
+                dC_dW_k.append(temp)
+            dC_dW.append(dC_dW_k)
+        self.dC_dW = dC_dW
 
+        # dC/dB = dC/dA * dA/dB = dC/dA * k'(Z)
+        dC_dB = []
+        for nodeIndex in range(self.size):
+            temp = self.dC_dA[nodeIndex] * dk(self.Z[nodeIndex])
+            dC_dB.append(temp)
+        self.dC_dB = dC_dB
+
+        # dC/d(lastLayer.A) = dC/dA * dA/d(lastLayer.A) = dC/dA * k'(Z) * W
+        last_dC_dA = []
+        for lastNodeIndex in range(self.lastLayer.size):
+            temp = 0
+            for nodeIndex in range(self.size):
+                temp += self.dC_dA[nodeIndex] * dk(self.Z[nodeIndex]) * self.W[nodeIndex][lastNodeIndex]
+            last_dC_dA.append(temp)
+        self.lastLayer.dC_dA = last_dC_dA
+
+    # updated X = X - learningRate * dC/dX
     def updateNeurons(self):
         pass
 
@@ -130,25 +157,26 @@ def costFunc():
 
 
 def terminalDisplay():
+    print("Neural Network Intoduction 2021\n")
     print("Input layer node value:", inputLayer.A)
 
-    print("\nlayer1 node bias:", layer1.B)
-    print("layer1 neuron weight:", layer1.W)
+    print("\nlayer1 B:", layer1.B)
+    print("layer1 W:", layer1.W)
     print("layer1 Z:", layer1.Z)
-    print("layer1 node value:", layer1.A)
+    print("layer1 A:", layer1.A)
 
-    print("\nlayer2 node bias:", layer2.B)
-    print("layer2 neuron weight:", layer2.W)
+    print("\nlayer2 B:", layer2.B)
+    print("layer2 W:", layer2.W)
     print("layer2 Z:", layer2.Z)
-    print("layer2 node value:", layer2.A)
+    print("layer2 A:", layer2.A)
 
-    print("\nOutput layer node bias:", outputLayer.B)
-    print("Output layer neuron weight:", outputLayer.W)
-    print("Output layer Z:", outputLayer.Z)
-    print("Output layer node value:", outputLayer.A)
+    print("\nOutput B:", outputLayer.B)
+    print("Output W:", outputLayer.W)
+    print("Output Z:", outputLayer.Z)
+    print("Output A:", outputLayer.A)
 
-    print(expectedOutput(inputLayer.A))
-    print(costFunc())
+    print("\nExpected output:", expectedOutput(inputLayer.A))
+    print("Cost:", costFunc())
 
 
 # 기타 함수 모음
@@ -179,18 +207,21 @@ if __name__ == "__main__":
     # createInputDataFile()
     # createEvaluationDataFile()
 
-    for _ in range(setting.epoch):
+    for epochIndex in range(setting.epoch):
         for dataIndex in range(setting.inputDataSize):
+            # 입력 데이터로 노드값 계산
             inputLayer.A = readData(dataIndex)[0]
             layer1.feedForward()
             layer2.feedForward()
             outputLayer.feedForward()
             terminalDisplay()
 
-            outputLayer.feedBackward()
-            layer2.feedBackward()
-            layer1.feedBackward()
-
-            layer1.updateNeurons()
-            layer2.updateNeurons()
-            outputLayer.updateNeurons()
+            # # 오차역전파
+            # outputLayer.feedBackward()
+            # layer2.feedBackward()
+            # layer1.feedBackward()
+            #
+            # # 가중치와 편향값의 gradient 방향 조정
+            # layer1.updateNeurons()
+            # layer2.updateNeurons()
+            # outputLayer.updateNeurons()
