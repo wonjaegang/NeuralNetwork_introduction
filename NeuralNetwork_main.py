@@ -80,15 +80,20 @@ class Layer:
 
     # updated X = X - learningRate * dC/dX
     def updateNeurons(self):
-        pass
+        for nodeIndex in range(self.size):
+            for lastNodeIndex in range(self.lastLayer.size):
+                self.W[nodeIndex][lastNodeIndex] -= setting.learningRate * self.dC_dW[nodeIndex][lastNodeIndex]
+
+        for nodeIndex in range(self.size):
+            self.B[nodeIndex] -= setting.learningRate * self.dC_dB[nodeIndex]
 
 
 class Setting:
     def __init__(self):
-        self.epoch = 1
-        self.inputDataSize = 1
-        self.evaluationDataSize = 1
-        self.learningRate = 0.5
+        self.epoch = 1000
+        self.inputDataSize = 1000
+        self.evaluationDataSize = 100
+        self.learningRate = 2
 
 
 # 하나의 입력-출력 데이터 셋을 파일에 입력
@@ -244,7 +249,8 @@ if __name__ == "__main__":
             outputLayer.feedBackward()
             layer2.feedBackward()
             layer1.feedBackward()
-            terminalDisplay()
+
+            # print("Data set #%d" % dataIndex)
 
         # 가중치와 편향값의 gradient 방향 조정
         layer1.updateNeurons()
