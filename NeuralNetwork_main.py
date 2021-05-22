@@ -156,18 +156,17 @@ def costFunc():
     return errorAverage
 
 
-# dC/dA = -2/n * (setPoint - Y)
-# 출력 레이어에서의 dC/dA는 비용함수의 A에 대한 편미분 값
-def outputLayer_dC_dA(setPoint):
-    dC_dA = []
+# dC/dY = -2/n * (setPoint - Y)
+# 출력 레이어에서의 dC/dA는 비용함수의 출력값 Y에 대한 편미분 값
+def get_dC_dY(setPoint):
+    dC_dY = []
     for nodeIndex in range(outputLayer.size):
         temp = -2 / outputLayer.size * (setPoint[nodeIndex] - outputLayer.A[nodeIndex])
-        dC_dA.append(temp)
-    return dC_dA
+        dC_dY.append(temp)
+    return dC_dY
 
 
 def terminalDisplay():
-    print("Neural Network Intoduction 2021\n")
     print("Input layer node value:", inputLayer.A)
 
     print("\nlayer1 B:", layer1.B)
@@ -237,16 +236,29 @@ if __name__ == "__main__":
             layer1.feedForward()
             layer2.feedForward()
             outputLayer.feedForward()
-            terminalDisplay()
 
             # 오차역전파
-            outputLayer.dC_dA = outputLayer_dC_dA(outputDataList)
+            outputLayer.dC_dA = get_dC_dY(outputDataList)
             outputLayer.feedBackward()
             layer2.feedBackward()
             layer1.feedBackward()
-            terminalDisplay()
 
-            # 가중치와 편향값의 gradient 방향 조정
-            layer1.updateNeurons()
-            layer2.updateNeurons()
-            outputLayer.updateNeurons()
+        # 가중치와 편향값의 gradient 방향 조정
+        layer1.updateNeurons()
+        layer2.updateNeurons()
+        outputLayer.updateNeurons()
+
+        # 테스트 데이터 셋으로 신경망 평가
+        averageCost = 0
+        for dataIndex in range(setting.evaluationDataSize):
+            inputDataList = readData(dataIndex)[0]
+            outputDataList = readData(dataIndex)[1]
+
+            inputLayer.A = inputDataList
+            layer1.feedForward()
+            layer2.feedForward()
+            outputLayer.feedForward()
+            averageCost = calculateAverage(averageCost, dataIndex + 1, costFunc())
+
+        terminalDisplay()
+        print("\nEpoch #%d Average Cost:" % (epochIndex + 1), averageCost)
