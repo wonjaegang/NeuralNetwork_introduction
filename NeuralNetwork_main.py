@@ -146,7 +146,7 @@ def expectedOutput(inputList):
         return [1]
 
 
-# C(y) = 1 / n * sum( (setPoint - Y)^2 )
+# C(y) = 1/n * sum( (setPoint - Y)^2 )
 # 비용함수는 오차의 제곱들의 평균값
 def costFunc():
     errorAverage = 0
@@ -154,6 +154,16 @@ def costFunc():
         error = (expectedOutput(inputLayer.A)[index] - outputLayer.A[index]) ** 2
         errorAverage = calculateAverage(errorAverage, index + 1, error)
     return errorAverage
+
+
+# dC/dA = -2/n * (setPoint - Y)
+# 출력 레이어에서의 dC/dA는 비용함수의 A에 대한 편미분 값
+def outputLayer_dC_dA(setPoint):
+    dC_dA = []
+    for nodeIndex in range(outputLayer.size):
+        temp = -2 / outputLayer.size * (setPoint[nodeIndex] - outputLayer.A[nodeIndex])
+        dC_dA.append(temp)
+    return dC_dA
 
 
 def terminalDisplay():
@@ -164,16 +174,25 @@ def terminalDisplay():
     print("layer1 W:", layer1.W)
     print("layer1 Z:", layer1.Z)
     print("layer1 A:", layer1.A)
+    print("layer1 dC/dA:", layer1.dC_dA)
+    print("layer1 dC/dW:", layer1.dC_dW)
+    print("layer1 dC/dB:", layer1.dC_dB)
 
     print("\nlayer2 B:", layer2.B)
     print("layer2 W:", layer2.W)
     print("layer2 Z:", layer2.Z)
     print("layer2 A:", layer2.A)
+    print("layer2 dC/dA:", layer2.dC_dA)
+    print("layer2 dC/dW:", layer2.dC_dW)
+    print("layer2 dC/dB:", layer2.dC_dB)
 
     print("\nOutput B:", outputLayer.B)
     print("Output W:", outputLayer.W)
     print("Output Z:", outputLayer.Z)
     print("Output A:", outputLayer.A)
+    print("Output dC/dA:", outputLayer.dC_dA)
+    print("Output dC/dW:", outputLayer.dC_dW)
+    print("Output dC/dB:", outputLayer.dC_dB)
 
     print("\nExpected output:", expectedOutput(inputLayer.A))
     print("Cost:", costFunc())
@@ -209,19 +228,25 @@ if __name__ == "__main__":
 
     for epochIndex in range(setting.epoch):
         for dataIndex in range(setting.inputDataSize):
+            # 데이터 셋에서 이번 인덱스의 데이터 추출
+            inputDataList = readData(dataIndex)[0]
+            outputDataList = readData(dataIndex)[1]
+
             # 입력 데이터로 노드값 계산
-            inputLayer.A = readData(dataIndex)[0]
+            inputLayer.A = inputDataList
             layer1.feedForward()
             layer2.feedForward()
             outputLayer.feedForward()
             terminalDisplay()
 
-            # # 오차역전파
-            # outputLayer.feedBackward()
-            # layer2.feedBackward()
-            # layer1.feedBackward()
-            #
-            # # 가중치와 편향값의 gradient 방향 조정
-            # layer1.updateNeurons()
-            # layer2.updateNeurons()
-            # outputLayer.updateNeurons()
+            # 오차역전파
+            outputLayer.dC_dA = outputLayer_dC_dA(outputDataList)
+            outputLayer.feedBackward()
+            layer2.feedBackward()
+            layer1.feedBackward()
+            terminalDisplay()
+
+            # 가중치와 편향값의 gradient 방향 조정
+            layer1.updateNeurons()
+            layer2.updateNeurons()
+            outputLayer.updateNeurons()
