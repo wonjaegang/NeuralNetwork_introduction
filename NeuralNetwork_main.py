@@ -21,19 +21,19 @@ class Layer:
             self.W = [randomList(lastLayer.size, -1, 1) for _ in range(size)]
 
             # 레이어 노드들의 활성화함수 입력값들로 이루어진 열벡터 Z
-            self.Z = []
+            self.Z = [0 for _ in range(size)]
 
             # 레이어 노드들의 활성화함수 출력값들로 이루어진 열벡터 A
-            self.A = []
+            self.A = [0 for _ in range(size)]
 
             # 비용함수의 노드값들에 대한 편미분값으로 이루어진 열벡터 dC_dA
-            self.dC_dA = []
+            self.dC_dA = [0 for _ in range(size)]
 
             # 비용함수의 가중치값들에 대한 편미분값으로 이루어진 (thisLayer size) * (lastLayer size) 크기의 행렬 dC_dA
-            self.dC_dW = []
+            self.dC_dW = [[0 for _ in range(lastLayer.size)] for _ in range(size)]
 
             # 비용함수의 편향값들에 대한 편미분값으로 이루어진 열벡터 dC_dA
-            self.dC_dB = []
+            self.dC_dB = [0 for _ in range(size)]
 
     # Z(n) =  W(n, n-1) * A(n-1) + B(n)
     # A(n) = k(Z(n)), k(x)는 활성화 함수
@@ -56,7 +56,8 @@ class Layer:
             dC_dW_k = []
             for lastNodeIndex in range(self.lastLayer.size):
                 temp = self.dC_dA[nodeIndex] * dk(self.Z[nodeIndex]) * self.lastLayer.A[lastNodeIndex]
-                dC_dW_k.append(temp)
+                average = calculateAverage(self.dC_dW[nodeIndex][lastNodeIndex], dataIndex + 1, temp)
+                dC_dW_k.append(average)
             dC_dW.append(dC_dW_k)
         self.dC_dW = dC_dW
 
@@ -64,7 +65,8 @@ class Layer:
         dC_dB = []
         for nodeIndex in range(self.size):
             temp = self.dC_dA[nodeIndex] * dk(self.Z[nodeIndex])
-            dC_dB.append(temp)
+            average = calculateAverage(self.dC_dB[nodeIndex], dataIndex + 1, temp)
+            dC_dB.append(average)
         self.dC_dB = dC_dB
 
         # dC/d(lastLayer.A) = dC/dA * dA/d(lastLayer.A) = dC/dA * k'(Z) * W
@@ -242,6 +244,7 @@ if __name__ == "__main__":
             outputLayer.feedBackward()
             layer2.feedBackward()
             layer1.feedBackward()
+            terminalDisplay()
 
         # 가중치와 편향값의 gradient 방향 조정
         layer1.updateNeurons()
@@ -260,5 +263,4 @@ if __name__ == "__main__":
             outputLayer.feedForward()
             averageCost = calculateAverage(averageCost, dataIndex + 1, costFunc())
 
-        terminalDisplay()
         print("\nEpoch #%d Average Cost:" % (epochIndex + 1), averageCost)
