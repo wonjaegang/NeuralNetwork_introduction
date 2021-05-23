@@ -145,12 +145,12 @@ def dk(x):
     return y
 
 
-# 입력값의 평균값이 0.5 미만이면 [0]을, 이상이면 [1]을 반환한다.
+# 입력값의 평균값이 0.5 미만이면 [1, 0]을, 이상이면 [0, 1]을 반환한다.
 def expectedOutput(inputList):
     if sum(inputList) < inputLayer.size / 2:
-        return [0]
+        return [0, 0]
     else:
-        return [1]
+        return [1, 1]
 
 
 # C(y) = 1/n * sum( (setPoint - Y)^2 )
@@ -213,6 +213,13 @@ def calculateAverage(lastAverage, n, an):
     return lastAverage * (n - 1) / n + an / n
 
 
+def analog2digital(analog):
+    if analog >= 0.5:
+        return 1
+    else:
+        return 0
+
+
 def sigmoid(x):
     return 1 / (1 + math.e ** (-1 * x))
 
@@ -227,16 +234,17 @@ if __name__ == "__main__":
     inputLayer = Layer(0, 10, False)
     layer1 = Layer(1, 4, inputLayer)
     layer2 = Layer(2, 4, layer1)
-    outputLayer = Layer(3, 1, layer2)
+    outputLayer = Layer(3, 2, layer2)
 
-    # createInputDataFile()
-    # createEvaluationDataFile()
+    createInputDataFile()
+    createEvaluationDataFile()
 
     for epochIndex in range(setting.epoch):
         for dataIndex in range(setting.inputDataSize):
             # 데이터 셋에서 이번 인덱스의 데이터 추출
-            inputDataList = readData(dataIndex)[0]
-            outputDataList = readData(dataIndex)[1]
+            extractedData = readData(dataIndex)
+            inputDataList = extractedData[0]
+            outputDataList = extractedData[1]
 
             # 입력 데이터로 노드값 계산
             inputLayer.A = inputDataList
@@ -258,15 +266,20 @@ if __name__ == "__main__":
         outputLayer.updateNeurons()
 
         # 테스트 데이터 셋으로 신경망 평가
-        averageCost = 0
+        correctAnswer = 0
         for dataIndex in range(setting.evaluationDataSize):
-            inputDataList = readData(dataIndex)[0]
-            outputDataList = readData(dataIndex)[1]
+            extractedData = readData(dataIndex)
+            inputDataList = extractedData[0]
+            outputDataList = extractedData[1]
 
             inputLayer.A = inputDataList
             layer1.feedForward()
             layer2.feedForward()
             outputLayer.feedForward()
-            averageCost = calculateAverage(averageCost, dataIndex + 1, costFunc())
 
-        print("\nEpoch #%d Average Cost:" % (epochIndex + 1), averageCost)
+            digitalOutput = list(map(lambda x: analog2digital(x), outputLayer.A))
+            if digitalOutput == outputDataList:
+                correctAnswer += 1
+        accuracy = correctAnswer / setting.evaluationDataSize
+
+        print("\nEpoch #%d Accuracy: %.2f%%" % (epochIndex + 1, accuracy * 100))
