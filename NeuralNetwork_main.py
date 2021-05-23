@@ -90,10 +90,10 @@ class Layer:
 
 class Setting:
     def __init__(self):
-        self.epoch = 1000
+        self.epoch = 10000
         self.inputDataSize = 1000
-        self.evaluationDataSize = 100
-        self.learningRate = 2
+        self.evaluationDataSize = 1000
+        self.learningRate = 0.5
 
 
 # 하나의 입력-출력 데이터 셋을 파일에 입력
@@ -171,6 +171,28 @@ def get_dC_dY(setPoint):
         temp = -2 / outputLayer.size * (setPoint[nodeIndex] - outputLayer.A[nodeIndex])
         dC_dY.append(temp)
     return dC_dY
+
+
+# 테스트 데이터 셋으로 신경망 평가
+def evaluateNeurons():
+    correctAnswer = 0
+    averageCost = 0
+    for dataIndex_test in range(setting.evaluationDataSize):
+        extractedData_test = readData(dataIndex_test)
+        inputDataList_test = extractedData_test[0]
+        outputDataList_test = extractedData_test[1]
+
+        inputLayer.A = inputDataList_test
+        layer1.feedForward()
+        layer2.feedForward()
+        outputLayer.feedForward()
+
+        digitalOutput = list(map(lambda x: analog2digital(x), outputLayer.A))
+        if digitalOutput == outputDataList_test:
+            correctAnswer += 1
+
+        averageCost = calculateAverage(averageCost, dataIndex_test + 1, costFunc())
+    return correctAnswer / setting.evaluationDataSize, averageCost
 
 
 def terminalDisplay():
@@ -258,28 +280,14 @@ if __name__ == "__main__":
             layer2.feedBackward()
             layer1.feedBackward()
 
-            # print("Data set #%d" % dataIndex)
-
         # 가중치와 편향값의 gradient 방향 조정
         layer1.updateNeurons()
         layer2.updateNeurons()
         outputLayer.updateNeurons()
 
-        # 테스트 데이터 셋으로 신경망 평가
-        correctAnswer = 0
-        for dataIndex in range(setting.evaluationDataSize):
-            extractedData = readData(dataIndex)
-            inputDataList = extractedData[0]
-            outputDataList = extractedData[1]
+        # 테스트 데이터 셋으로 신경망의 정확도 계산
+        evaluated = evaluateNeurons()
+        accuracy = evaluated[0]
+        cost = evaluated[1]
 
-            inputLayer.A = inputDataList
-            layer1.feedForward()
-            layer2.feedForward()
-            outputLayer.feedForward()
-
-            digitalOutput = list(map(lambda x: analog2digital(x), outputLayer.A))
-            if digitalOutput == outputDataList:
-                correctAnswer += 1
-        accuracy = correctAnswer / setting.evaluationDataSize
-
-        print("\nEpoch #%d Accuracy: %.2f%%" % (epochIndex + 1, accuracy * 100))
+        print("\nEpoch #%d Accuracy: %.2f%%, Cost: %f" % (epochIndex + 1, accuracy * 100, cost))
