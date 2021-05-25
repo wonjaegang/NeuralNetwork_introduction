@@ -1,5 +1,4 @@
-import random
-import math
+from extraFunctions import *
 from timeit import default_timer as timer
 
 
@@ -221,31 +220,6 @@ def recordNeurons():
         f.write("\n")
 
 
-# 기타 함수 모음 --------------------------------------------------------------------------------------------------------
-def randomList(size, minimum, maximum):
-    return [random.uniform(minimum, maximum) for _ in range(size)]
-
-
-def calculateAverage(lastAverage, n, an):
-    return lastAverage * (n - 1) / n + an / n
-
-
-def analog2digital(analog):
-    if analog >= 0.5:
-        return 1
-    else:
-        return 0
-
-
-def sigmoid(x):
-    return 1 / (1 + math.e ** (-1 * x))
-
-
-def derivativeSigmoid(x):
-    return sigmoid(x) * (1 - sigmoid(x))
-# ----------------------------------------------------------------------------------------------------------------------
-
-
 if __name__ == "__main__":
     setting = Setting()
 
@@ -298,7 +272,7 @@ if __name__ == "__main__":
     # 학습된 신경망 데이터를 파일로 저장
     recordNeurons()
 
-    # recordNeurons 에서 생성한 파일에서 값을 추출할 함수가 필요하다
-    # 다른 입력/출력도 해봐야함. 리니어하지 않은걸로
-    # 다양한 방법의 경사구배를 사용해보자.
-    # 출력함수와 활성화함수를 구분하자.
+    # TODO: recordNeurons 에서 생성한 파일에서 값을 추출할 함수가 필요하다
+    # TODO: 다른 입력/출력도 해봐야함. 리니어하지 않은걸로
+    # TODO: 다양한 방법의 경사구배를 사용해보자.
+    # TODO: 출력함수와 활성화함수를 구분하자.
