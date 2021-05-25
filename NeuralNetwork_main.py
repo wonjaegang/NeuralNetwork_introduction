@@ -195,9 +195,18 @@ def evaluateNeurons():
     return correctAnswer / setting.evaluationDataSize, averageCost
 
 
+# 각 epoch 마다 신경망평가 결과를 출력하고 파일로 저장
+def recordEvaluationResult():
+    print("Epoch #%d Accuracy: %.2f%%, Cost: %f, Running Time: %fsec"
+          % (epochIndex + 1, accuracy * 100, cost, runningTime))
+    with open("TestResultData", 'a' if epochIndex else 'w') as f:
+        f.write("%f, %f, %f" % (accuracy, cost, runningTime))
+        f.write("\n")
+
+
 # 학습된 신경망의 정보를 파일로 저장
 def recordNeurons():
-    with open("NeuronData", 'w') as f:
+    with open("learnedNeuronData", 'w') as f:
         f.write(str(layer1.dC_dW))
         f.write("\n")
         f.write(str(layer1.dC_dB))
@@ -209,6 +218,7 @@ def recordNeurons():
         f.write(str(outputLayer.dC_dW))
         f.write("\n")
         f.write(str(outputLayer.dC_dB))
+        f.write("\n")
 
 
 # 기타 함수 모음 --------------------------------------------------------------------------------------------------------
@@ -278,17 +288,17 @@ if __name__ == "__main__":
         accuracy = evaluated[0]
         cost = evaluated[1]
 
-        # 한 epoch 의 실행시간
+        # 한 epoch 의 실행시간 계산
         epochFinishTime = timer()
         runningTime = epochFinishTime - epochStartTime
 
-        print("Epoch #%d Accuracy: %.2f%%, Cost: %f, Running Time: %fsec"
-              % (epochIndex + 1, accuracy * 100, cost, runningTime))
+        # 신경망평가 결과를 출력하고 파일로 저장
+        recordEvaluationResult()
 
+    # 학습된 신경망 데이터를 파일로 저장
     recordNeurons()
 
-    # 가중치/편향값 저장할방법이 필요함 그걸 읽을 방법도
-    # 각 에포크마다 정확도와 비용을 터미널 출력뿐만아니라 파일에 기록하는 함수가 필요함
+    # recordNeurons 에서 생성한 파일에서 값을 추출할 함수가 필요하다
     # 다른 입력/출력도 해봐야함. 리니어하지 않은걸로
     # 다양한 방법의 경사구배를 사용해보자.
     # 출력함수와 활성화함수를 구분하자.
