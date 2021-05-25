@@ -90,7 +90,7 @@ class Layer:
 
 class Setting:
     def __init__(self):
-        self.epoch = 10000
+        self.epoch = 10
         self.inputDataSize = 1000
         self.evaluationDataSize = 1000
         self.learningRate = 0.5
@@ -195,6 +195,22 @@ def evaluateNeurons():
     return correctAnswer / setting.evaluationDataSize, averageCost
 
 
+# 학습된 신경망의 정보를 파일로 저장
+def recordNeurons():
+    with open("NeuronData", 'w') as f:
+        f.write(str(layer1.dC_dW))
+        f.write("\n")
+        f.write(str(layer1.dC_dB))
+        f.write("\n")
+        f.write(str(layer2.dC_dW))
+        f.write("\n")
+        f.write(str(layer2.dC_dB))
+        f.write("\n")
+        f.write(str(outputLayer.dC_dW))
+        f.write("\n")
+        f.write(str(outputLayer.dC_dB))
+
+
 # 기타 함수 모음 --------------------------------------------------------------------------------------------------------
 def randomList(size, minimum, maximum):
     return [random.uniform(minimum, maximum) for _ in range(size)]
@@ -269,9 +285,10 @@ if __name__ == "__main__":
         print("Epoch #%d Accuracy: %.2f%%, Cost: %f, Running Time: %fsec"
               % (epochIndex + 1, accuracy * 100, cost, runningTime))
 
-    # 시간 출력함수가 필요함
+    recordNeurons()
+
     # 가중치/편향값 저장할방법이 필요함 그걸 읽을 방법도
     # 각 에포크마다 정확도와 비용을 터미널 출력뿐만아니라 파일에 기록하는 함수가 필요함
-    # 다른 입력/출력도 해봐야함. 리니어하지 않은걸로/
+    # 다른 입력/출력도 해봐야함. 리니어하지 않은걸로
     # 다양한 방법의 경사구배를 사용해보자.
     # 출력함수와 활성화함수를 구분하자.
