@@ -1,10 +1,10 @@
 import random
 import math
+from timeit import default_timer as timer
 
 
 class Layer:
-    def __init__(self, layerIndex, size, lastLayer):
-        self.layerIndex = layerIndex
+    def __init__(self, size, lastLayer):
         self.size = size
         # If it is an input layer
         if not lastLayer:
@@ -195,38 +195,7 @@ def evaluateNeurons():
     return correctAnswer / setting.evaluationDataSize, averageCost
 
 
-def terminalDisplay():
-    print("Input layer node value:", inputLayer.A)
-
-    print("\nlayer1 B:", layer1.B)
-    print("layer1 W:", layer1.W)
-    print("layer1 Z:", layer1.Z)
-    print("layer1 A:", layer1.A)
-    print("layer1 dC/dA:", layer1.dC_dA)
-    print("layer1 dC/dW:", layer1.dC_dW)
-    print("layer1 dC/dB:", layer1.dC_dB)
-
-    print("\nlayer2 B:", layer2.B)
-    print("layer2 W:", layer2.W)
-    print("layer2 Z:", layer2.Z)
-    print("layer2 A:", layer2.A)
-    print("layer2 dC/dA:", layer2.dC_dA)
-    print("layer2 dC/dW:", layer2.dC_dW)
-    print("layer2 dC/dB:", layer2.dC_dB)
-
-    print("\nOutput B:", outputLayer.B)
-    print("Output W:", outputLayer.W)
-    print("Output Z:", outputLayer.Z)
-    print("Output A:", outputLayer.A)
-    print("Output dC/dA:", outputLayer.dC_dA)
-    print("Output dC/dW:", outputLayer.dC_dW)
-    print("Output dC/dB:", outputLayer.dC_dB)
-
-    print("\nExpected output:", expectedOutput(inputLayer.A))
-    print("Cost:", costFunc())
-
-
-# 기타 함수 모음
+# 기타 함수 모음 --------------------------------------------------------------------------------------------------------
 def randomList(size, minimum, maximum):
     return [random.uniform(minimum, maximum) for _ in range(size)]
 
@@ -248,20 +217,23 @@ def sigmoid(x):
 
 def derivativeSigmoid(x):
     return sigmoid(x) * (1 - sigmoid(x))
+# ----------------------------------------------------------------------------------------------------------------------
 
 
 if __name__ == "__main__":
     setting = Setting()
 
-    inputLayer = Layer(0, 10, False)
-    layer1 = Layer(1, 4, inputLayer)
-    layer2 = Layer(2, 4, layer1)
-    outputLayer = Layer(3, 2, layer2)
+    inputLayer = Layer(10, False)
+    layer1 = Layer(4, inputLayer)
+    layer2 = Layer(4, layer1)
+    outputLayer = Layer(2, layer2)
 
-    createInputDataFile()
-    createEvaluationDataFile()
+    # createInputDataFile()
+    # createEvaluationDataFile()
 
     for epochIndex in range(setting.epoch):
+        epochStartTime = timer()
+
         for dataIndex in range(setting.inputDataSize):
             # 데이터 셋에서 이번 인덱스의 데이터 추출
             extractedData = readData(dataIndex)
@@ -290,4 +262,16 @@ if __name__ == "__main__":
         accuracy = evaluated[0]
         cost = evaluated[1]
 
-        print("\nEpoch #%d Accuracy: %.2f%%, Cost: %f" % (epochIndex + 1, accuracy * 100, cost))
+        # 한 epoch 의 실행시간
+        epochFinishTime = timer()
+        runningTime = epochFinishTime - epochStartTime
+
+        print("Epoch #%d Accuracy: %.2f%%, Cost: %f, Running Time: %fsec"
+              % (epochIndex + 1, accuracy * 100, cost, runningTime))
+
+    # 시간 출력함수가 필요함
+    # 가중치/편향값 저장할방법이 필요함 그걸 읽을 방법도
+    # 각 에포크마다 정확도와 비용을 터미널 출력뿐만아니라 파일에 기록하는 함수가 필요함
+    # 다른 입력/출력도 해봐야함. 리니어하지 않은걸로/
+    # 다양한 방법의 경사구배를 사용해보자.
+    # 출력함수와 활성화함수를 구분하자.
