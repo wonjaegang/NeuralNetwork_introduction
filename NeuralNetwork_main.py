@@ -122,8 +122,8 @@ def createEvaluationDataFile():
 
 
 # 데이터셋 파일로부터 입력/출력 리스트 추출
-def readData(index):
-    with open("Data/InputData.txt", 'r') as f:
+def readData(fileName, index):
+    with open(fileName, 'r') as f:
         for i, line in enumerate(f):
             if i == index:
                 split = line.split(',')
@@ -177,7 +177,7 @@ def evaluateNeurons():
     correctAnswer = 0
     averageCost = 0
     for dataIndex_test in range(setting.evaluationDataSize):
-        extractedData_test = readData(dataIndex_test)
+        extractedData_test = readData("Data/EvaluationData.txt", dataIndex_test)
         inputDataList_test = extractedData_test[0]
         outputDataList_test = extractedData_test[1]
 
@@ -252,7 +252,7 @@ if __name__ == "__main__":
 
         for dataIndex in range(setting.inputDataSize):
             # 데이터 셋에서 이번 인덱스의 데이터 추출
-            extractedData = readData(dataIndex)
+            extractedData = readData("Data/InputData.txt", dataIndex)
             inputDataList = extractedData[0]
             outputDataList = extractedData[1]
 
