@@ -89,7 +89,7 @@ class Layer:
 
 class Setting:
     def __init__(self):
-        self.epoch = 1
+        self.epoch = 10
         self.inputDataSize = 1000
         self.evaluationDataSize = 1000
         self.learningRate = 0.5
@@ -109,21 +109,21 @@ def createDataSet(file):
 
 # 입력 데이터 파일을 생성
 def createInputDataFile():
-    with open("InputData", 'w') as f:
+    with open("Data/InputData.txt", 'w') as f:
         for _ in range(setting.inputDataSize):
             createDataSet(f)
 
 
 # 평가용 데이터 파일을 생성
 def createEvaluationDataFile():
-    with open("EvaluationData", 'w') as f:
+    with open("Data/EvaluationData.txt", 'w') as f:
         for _ in range(setting.evaluationDataSize):
             createDataSet(f)
 
 
 # 데이터셋 파일로부터 입력/출력 리스트 추출
 def readData(index):
-    with open("InputData", 'r') as f:
+    with open("Data/InputData.txt", 'r') as f:
         for i, line in enumerate(f):
             if i == index:
                 split = line.split(',')
@@ -198,7 +198,7 @@ def evaluateNeurons():
 def recordEvaluationResult():
     print("Epoch #%d Accuracy: %.2f%%, Cost: %f, Running Time: %fsec"
           % (epochIndex + 1, accuracy * 100, cost, runningTime))
-    with open("TestResultData", 'a' if epochIndex else 'w') as f:
+    with open("Data/TestResultData.txt", 'a' if epochIndex else 'w') as f:
         f.write("%f, %f, %f" % (accuracy, cost, runningTime))
         f.write("\n")
 
@@ -213,14 +213,14 @@ def recordNeurons():
         for b in layer.B:
             f.write("%s " % str(b))
         f.write("\n")
-    with open("learnedNeuronData", 'w') as f:
+    with open("Data/learnedNeuronData.txt", 'w') as f:
         writeNeuronData(layer1)
         writeNeuronData(layer2)
         writeNeuronData(outputLayer)
 
 
 # 학습된 신경망의 정보를 파일에서 추출
-def loadNeurons():
+def loadNeurons(fileName):
     def extractNeuronData(layer):
         layerData_W = []
         lines = [f.readline() for _ in range(layer.size)]
@@ -229,7 +229,7 @@ def loadNeurons():
             layerData_W.append(WList)
         layerData_B = list(map(lambda x: float(x), f.readline().split(' ')[:-1]))
         return layerData_W, layerData_B
-    with open("learnedNeuronData", 'r') as f:
+    with open(fileName, 'r') as f:
         layer1Data = extractNeuronData(layer1)
         layer2Data = extractNeuronData(layer2)
         outputLayerData = extractNeuronData(outputLayer)
@@ -244,8 +244,8 @@ if __name__ == "__main__":
     layer2 = Layer(4, layer1)
     outputLayer = Layer(2, layer2)
 
-    # createInputDataFile()
-    # createEvaluationDataFile()
+    createInputDataFile()
+    createEvaluationDataFile()
 
     for epochIndex in range(setting.epoch):
         epochStartTime = timer()
@@ -288,7 +288,7 @@ if __name__ == "__main__":
     # 학습된 신경망 데이터를 파일로 저장
     recordNeurons()
 
-    neuronData = loadNeurons()
+    neuronData = loadNeurons("Data/learnedNeuronData.txt")
     print("layer1 Weight data:", neuronData[0][0])
     print("layer1 Bias data:", neuronData[0][1])
 
