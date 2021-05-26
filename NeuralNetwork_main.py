@@ -89,7 +89,7 @@ class Layer:
 
 class Setting:
     def __init__(self):
-        self.epoch = 10
+        self.epoch = 1
         self.inputDataSize = 1000
         self.evaluationDataSize = 1000
         self.learningRate = 0.5
@@ -205,19 +205,35 @@ def recordEvaluationResult():
 
 # 학습된 신경망의 정보를 파일로 저장
 def recordNeurons():
+    def writeNeuronData(layer):
+        for Wi in layer.W:
+            for Wik in Wi:
+                f.write("%s " % str(Wik))
+            f.write("\n")
+        for b in layer.B:
+            f.write("%s " % str(b))
+        f.write("\n")
     with open("learnedNeuronData", 'w') as f:
-        f.write(str(layer1.dC_dW))
-        f.write("\n")
-        f.write(str(layer1.dC_dB))
-        f.write("\n")
-        f.write(str(layer2.dC_dW))
-        f.write("\n")
-        f.write(str(layer2.dC_dB))
-        f.write("\n")
-        f.write(str(outputLayer.dC_dW))
-        f.write("\n")
-        f.write(str(outputLayer.dC_dB))
-        f.write("\n")
+        writeNeuronData(layer1)
+        writeNeuronData(layer2)
+        writeNeuronData(outputLayer)
+
+
+# 학습된 신경망의 정보를 파일에서 추출
+def loadNeurons():
+    def extractNeuronData(layer):
+        layerData_W = []
+        lines = [f.readline() for _ in range(layer.size)]
+        for line in lines:
+            WList = list(map(lambda x: float(x), line.split(' ')[:-1]))
+            layerData_W.append(WList)
+        layerData_B = list(map(lambda x: float(x), f.readline().split(' ')[:-1]))
+        return layerData_W, layerData_B
+    with open("learnedNeuronData", 'r') as f:
+        layer1Data = extractNeuronData(layer1)
+        layer2Data = extractNeuronData(layer2)
+        outputLayerData = extractNeuronData(outputLayer)
+        return layer1Data, layer2Data, outputLayerData
 
 
 if __name__ == "__main__":
@@ -272,7 +288,10 @@ if __name__ == "__main__":
     # 학습된 신경망 데이터를 파일로 저장
     recordNeurons()
 
-    # TODO: recordNeurons 에서 생성한 파일에서 값을 추출할 함수가 필요하다
+    neuronData = loadNeurons()
+    print("layer1 Weight data:", neuronData[0][0])
+    print("layer1 Bias data:", neuronData[0][1])
+
     # TODO: 다른 입력/출력도 해봐야함. 리니어하지 않은걸로
     # TODO: 다양한 방법의 경사구배를 사용해보자.
     # TODO: 출력함수와 활성화함수를 구분하자.
